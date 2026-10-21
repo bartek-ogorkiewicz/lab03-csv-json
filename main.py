@@ -3,6 +3,8 @@
 # przyjmuję, że miesiące zapisujemy z małej litery używając polskich znaków, a dni tygodnia skrótowo: pn, wt, śr, cz, pt, sb, nd; z kolei pory dnia "rano" lub "wieczór"
 
 from pathlib import Path
+import json
+import random
 
 def main():
     # TODO: Osoba 1
@@ -40,12 +42,26 @@ def generate_csv_file(path):
     pass
 
 def read_json_file(path):
-    # TODO: Osoba 4
-    pass
+    with open(path, 'r') as file:
+        data = json.load(file)
+
+    try:
+        if (data["Model"] == 'A'):
+            print("Dane z ", path, ": ", data["Wynik"])
+    except KeyError:
+        print("Niepoprawny format danych!")
 
 def generate_json_file(path):
-    # TODO: Osoba 4
-    pass
+    letters = ['A', 'B', 'C']
+
+    data = {
+        "Model": letters[random.randint(1, 3)],
+        "Wynik": random.randint(0, 1000),
+        "Czas": random.randint(0, 1000) + "s"
+    }
+
+    with open(path, 'w') as file:
+        json.dump(data, file)
 
 # Funkcja odczytuje dane z plików w podanym folderze
 # Jeżeli pliki nie istnieją wypisuje odpowiedni komunikat
