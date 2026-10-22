@@ -115,7 +115,7 @@ def generate_json_file(path):
 def read_files(path, f_csv, f_json):
     if not (path/"Dane.csv").exists():
         print("Nie można odczytać zawartości pliku csv. Brak pliku w podanej ścieżce.")
-    if f_csv:
+    elif f_csv:
         read_csv_file(path/"Dane.csv")
 
     if not (path/"Dane.json").exists():
