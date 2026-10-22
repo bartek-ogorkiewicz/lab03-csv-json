@@ -4,6 +4,7 @@
 
 import argparse
 from pathlib import Path
+import json
 from random import randint
 from csv import reader
 
@@ -99,12 +100,26 @@ def generate_csv_file(path):
         print("Wystąpił błąd: "+str(err))
 
 def read_json_file(path):
-    # TODO: Osoba 4
-    pass
+    with open(path, 'r') as file:
+        data = json.load(file)
+
+    try:
+        if (data["Model"] == 'A'):
+            print("Dane z ", path, ": ", data["Wynik"])
+    except KeyError:
+        print("Niepoprawny format danych!")
 
 def generate_json_file(path):
-    # TODO: Osoba 4
-    pass
+    letters = ['A', 'B', 'C']
+
+    data = {
+        "Model": letters[randint(0, 2)],
+        "Wynik": randint(0, 1000),
+        "Czas": str(randint(0, 1000)) + "s"
+    }
+
+    with open(path, 'w') as file:
+        json.dump(data, file)
 
 # Funkcja odczytuje dane z plików w podanym folderze
 # Jeżeli pliki nie istnieją wypisuje odpowiedni komunikat
