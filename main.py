@@ -4,6 +4,8 @@
 
 import argparse
 from pathlib import Path
+from random import randint
+from csv import reader
 
 
 def main():
@@ -59,13 +61,42 @@ def generate_paths(months, days, time):
 
     return paths
 
+# Funkcja odczytuje i sumuje wartosci z kolumny czas 
+# dla modeli typu "A" w podanym pliku
 def read_csv_file(path):
-    # TODO: Osoba 3
-    pass
+    try:
+        file = open(path+".csv","r")
+        file_content = reader(file)
+        next(file_content, None)
 
+        time_sum = 0
+        for row in file_content:
+            row = row[0].replace("\n","").replace(" ","")
+            row = row.split(";")
+            if row[0] == 'A':
+                time_sum += int(row[2][0:-1])
+        print(time_sum)
+        #return time_sum
+    except FileNotFoundError:
+        print("Nie istnieje plik: \""+path+"\"")
+    except Exception as err:
+        print("Wystąpił błąd: "+str(err))
+    print(0)
+    #return 0
+
+# Funkcja plik csv w podanym folderze
 def generate_csv_file(path):
-    # TODO: Osoba 3
-    pass
+    try:
+        file = open(path+".csv","w")
+        file.write("Model; Wynik; Czas;\n")
+
+        x = ['A','B','C'][randint(0,2)]
+        y = str(randint(0,1000))
+        z = str(randint(0,1000))+'s'
+
+        file.write(x+" ; "+y+" ; "+z+" ;")
+    except Exception as err:
+        print("Wystąpił błąd: "+str(err))
 
 def read_json_file(path):
     # TODO: Osoba 4
