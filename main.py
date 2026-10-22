@@ -2,15 +2,44 @@
 # przykładowy input: [miesiąc, miesiąc2], [pn-wt, pt], [r, w] -o -t -c -j
 # przyjmuję, że miesiące zapisujemy z małej litery używając polskich znaków, a dni tygodnia skrótowo: pn, wt, śr, cz, pt, sb, nd; z kolei pory dnia "rano" lub "wieczór"
 
+import argparse
 from pathlib import Path
 import json
-import random
+from random import randint
+from csv import reader
+
 
 def main():
-    # TODO: Osoba 1
+    parser = argparse.ArgumentParser(description="Tworzy lub odczytuje pliki Dane.csv i Dane.json w katalogach miesiąc/dzień/pora")
+    parser.add_argument("-m", nargs="+", required=True, help="miesiące, np. styczeń luty")
+    parser.add_argument("-d", nargs="+", required=True, help="dzień lub zakres dni dla każdego miesiąca, np. pn-wt pt")
+    parser.add_argument("-p", nargs="*", default=[], choices=["r", "w"], help="pora dnia (r - rano, w - wieczór) dla każdego dnia, domyślnie rano")
+    parser.add_argument("-t", action="store_true", help="tworzenie plików (bez -t pliki są odczytywane)")
+    parser.add_argument("-c", action="store_true", help="pliki csv")
+    parser.add_argument("-j", action="store_true", help="pliki json")
+    args = parser.parse_args()
 
-    paths = generate_paths(["styczen", "luty"], ["pn-wt", "pt"], ["r", "w"])
-    create_folders_and_handle_files(paths, True, True, True, True)
+    if len(args.m) != len(args.d):
+        parser.error("liczba miesięcy i zakresów dni musi być taka sama")
+
+    ile_dni = 0
+    for d in args.d:
+        if "-" in d:
+            ile_dni += len(days_range(d))
+        else:
+            ile_dni += 1
+
+    pory = []
+    for p in args.p:
+        if p == "r":
+            pory.append("rano")
+        else:
+            pory.append("wieczór")
+    while len(pory) < ile_dni:
+        pory.append("rano")
+
+    paths = generate_paths(args.m, args.d, pory)
+    create_folders_and_handle_files(paths, args.t, not args.t, args.c, args.j)
 
 def generate_paths(months, days, time):
     paths = []
@@ -33,13 +62,42 @@ def generate_paths(months, days, time):
 
     return paths
 
+# Funkcja odczytuje i sumuje wartosci z kolumny czas 
+# dla modeli typu "A" w podanym pliku
 def read_csv_file(path):
-    # TODO: Osoba 3
-    pass
+    try:
+        file = open(path+".csv","r")
+        file_content = reader(file)
+        next(file_content, None)
 
+        time_sum = 0
+        for row in file_content:
+            row = row[0].replace("\n","").replace(" ","")
+            row = row.split(";")
+            if row[0] == 'A':
+                time_sum += int(row[2][0:-1])
+        print(time_sum)
+        #return time_sum
+    except FileNotFoundError:
+        print("Nie istnieje plik: \""+path+"\"")
+    except Exception as err:
+        print("Wystąpił błąd: "+str(err))
+    print(0)
+    #return 0
+
+# Funkcja plik csv w podanym folderze
 def generate_csv_file(path):
-    # TODO: Osoba 3
-    pass
+    try:
+        file = open(path+".csv","w")
+        file.write("Model; Wynik; Czas;\n")
+
+        x = ['A','B','C'][randint(0,2)]
+        y = str(randint(0,1000))
+        z = str(randint(0,1000))+'s'
+
+        file.write(x+" ; "+y+" ; "+z+" ;")
+    except Exception as err:
+        print("Wystąpił błąd: "+str(err))
 
 def read_json_file(path):
     with open(path, 'r') as file:
@@ -56,8 +114,8 @@ def generate_json_file(path):
 
     data = {
         "Model": letters[random.randint(1, 3)],
-        "Wynik": random.randint(0, 1000),
-        "Czas": random.randint(0, 1000) + "s"
+        "Wynik": randint(0, 1000),
+        "Czas": randint(0, 1000) + "s"
     }
 
     with open(path, 'w') as file:
