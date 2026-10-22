@@ -2,13 +2,41 @@
 # przykładowy input: [miesiąc, miesiąc2], [pn-wt, pt], [r, w] -o -t -c -j
 # przyjmuję, że miesiące zapisujemy z małej litery używając polskich znaków, a dni tygodnia skrótowo: pn, wt, śr, cz, pt, sb, nd; z kolei pory dnia "rano" lub "wieczór"
 
+import argparse
 from pathlib import Path
 
-def main():
-    # TODO: Osoba 1
 
-    paths = generate_paths(["styczen", "luty"], ["pn-wt", "pt"], ["r", "w"])
-    create_folders_and_handle_files(paths, True, True, True, True)
+def main():
+    parser = argparse.ArgumentParser(description="Tworzy lub odczytuje pliki Dane.csv i Dane.json w katalogach miesiąc/dzień/pora")
+    parser.add_argument("-m", nargs="+", required=True, help="miesiące, np. styczeń luty")
+    parser.add_argument("-d", nargs="+", required=True, help="dzień lub zakres dni dla każdego miesiąca, np. pn-wt pt")
+    parser.add_argument("-p", nargs="*", default=[], choices=["r", "w"], help="pora dnia (r - rano, w - wieczór) dla każdego dnia, domyślnie rano")
+    parser.add_argument("-t", action="store_true", help="tworzenie plików (bez -t pliki są odczytywane)")
+    parser.add_argument("-c", action="store_true", help="pliki csv")
+    parser.add_argument("-j", action="store_true", help="pliki json")
+    args = parser.parse_args()
+
+    if len(args.m) != len(args.d):
+        parser.error("liczba miesięcy i zakresów dni musi być taka sama")
+
+    ile_dni = 0
+    for d in args.d:
+        if "-" in d:
+            ile_dni += len(days_range(d))
+        else:
+            ile_dni += 1
+
+    pory = []
+    for p in args.p:
+        if p == "r":
+            pory.append("rano")
+        else:
+            pory.append("wieczór")
+    while len(pory) < ile_dni:
+        pory.append("rano")
+
+    paths = generate_paths(args.m, args.d, pory)
+    create_folders_and_handle_files(paths, args.t, not args.t, args.c, args.j)
 
 def generate_paths(months, days, time):
     paths = []
